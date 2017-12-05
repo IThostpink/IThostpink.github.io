@@ -258,6 +258,316 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/14/js中的方法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MIS">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IThostpink">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/14/js中的方法/" itemprop="url">Unbenannt</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-14T23:24:49+08:00">
+                2017-11-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="JS-中方法的整理"><a href="#JS-中方法的整理" class="headerlink" title="JS 中方法的整理"></a>JS 中方法的整理</h2><p>这几天一直想着把JS中常用的方法整理一下，今天考到有别人整理好的，拿来用用<br>仿ECMAScript5中Object.create()函数</p>
+<pre><code>function inherit(obj) {
+    if (obj === null) throw TypeError();
+    if (Object.create) return Object.create(obj);
+    var t = typeof obj;
+    if (t !== &quot;object&quot; &amp;&amp; t !== &quot;function&quot;) throw TypeError();
+    function Fn() {};
+    Fn.prototype = obj;
+    return new Fn();
+}
+</code></pre><p>仿ECMAScript5中String.trim()函数</p>
+<pre><code>String.prototype.mytrim = function () {
+    String.prototype.trim || function () {
+        if (!this) return this; //空字符串不做处理
+        return this.replace(/^\s+|\s+$/g, &quot;&quot;) //使用正则表达式经行空格替换
+    }
+}
+</code></pre><p>仿ECMAScript5中Array.reduce()函数</p>
+<pre><code>var reduce = Array.prototype.reduce ? function (ary, fn, initial) {
+    if (arguments.length &gt; 2) { //如果reduce()方法存在的话
+        return ary.reduce(fn, initial); //如果传入了一个初始值
+    } else {
+        return ary.reduce(fn); //否则初始值
+    }
+} : function (ary, fn, initial) { //以特定的初始值开始，否则第一个值取自ary
+    var i = 0,
+        len = ary.length,
+        accumulator;
+    if (arguments.length &gt; 2) {
+        accumulator = initial;
+    } else { //找到数组中第一个已经定义的索引
+        if (len == 0) throw TypeError();
+        while (i &lt; len) {
+            if (i in ary) {
+                accumulator = ary[i++];
+                break;
+            } else {
+                i++;
+            }
+        }
+        if (i == len) throw TypeError();
+    }
+    while (i &lt; len) { //对于数组中剩下的元素依次调用fn
+        if (i in ary) {
+            accumulator = fn.call(undefined, accumulator, ary[i], i, ary)
+        }
+        i++;
+    }
+    return accumulator;
+}
+</code></pre><p>⬆ back to top</p>
+<p>在数组中查找所有出现的元素方法</p>
+<pre><code>function findAll(ary, ele) {
+    var results = [],
+        len = a.length,
+        pos = 0;
+    while (pos &lt; len) {
+        pos = ary.indexOf(ele, pos);
+        if (pos === -1) break;
+        results.push(pos);
+        pos++;
+    }
+    return results;
+}
+</code></pre><p>⬆ back to top</p>
+<p>数据类型检测，特殊情况特殊处理</p>
+<pre><code>function classOf(obj) {
+    if (obj === null) return &quot;Null&quot;;
+    if (obj === undefined) return &apos;Undefined&apos;;
+    return Object.prototype.toString.call(obj).slice(8, -1);
+}
+</code></pre><p>⬆ back to top</p>
+<p>仿ECMAScript5中Object.keys()函数</p>
+<pre><code>function keys(obj) {
+    if (typeof obj !== &quot;object&quot;) {
+        throw TypeError();
+    }
+    var result = [];
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            result.push(prop);
+        }
+    }
+    return result;
+}
+</code></pre><p>⬆ back to top</p>
+<p>仿Math.max方法（不定实参函数）</p>
+<pre><code>function max() {
+    var max = Number.NEGATIVE_INFINITY;
+    for (var i = 0; i &lt; arguments.length; i++) {
+        if (arguments[i] &gt; max) max = arguments[i];
+    }
+    return max;
+}
+</code></pre><p>⬆ back to top</p>
+<p>仿ECMAScript5中Function.bind()函数</p>
+<pre><code>if (!Function.prototype.bind) {
+    Function.prototype.bind = function (obj) {
+        var self = this,
+            boundArgs = arguments;
+        return function () {
+            var args = [],
+                i;
+            for (i = 1; i &lt; boundArgs.length; i++) args.push(boundArgs[i]);
+            for (i = 1; i &lt; arguments.length; i++) args.push(arguments[i]);
+            return self.apply(obj, args);
+        }
+    }
+}
+</code></pre><p>⬆ back to top</p>
+<p>仿ECMAScript5中Array.map()函数</p>
+<pre><code>var map = Array.prototype.map ? function (ary, fn) {
+    return ary.map(fn);
+} : function (ary, fn) {
+    var results = [];
+    for (var i = 0, len = ary.length; i &lt; len; i++) {
+        if (i in ary) {
+            results[i] = fn.call(null, ary[i], i, ary);
+        }
+    }
+    return results;
+}
+</code></pre><p>⬆ back to top</p>
+<p>数组去重</p>
+<pre><code>Array.prototype.unique = function unique() {
+    var obj = {};
+    for (var i = 0; i &lt; this.length; i++) {
+        var current = this[i];
+        if (obj[current] === current) {
+            current = this[this.length - 1];
+            this.length--;
+            i--;
+            continue;
+        }
+        obj[current] = current
+    }
+    obj = null;
+    return this;
+}
+</code></pre><p>⬆ back to top</p>
+<p>冒泡排序</p>
+<pre><code>Array.prototype.bubbleSort = function bubbleSort() {
+    var temp = null;
+    for (var i = 0; i &lt; this.length - 1; i++) {
+        for (var k = 0; k &lt; this.length - 1 - i; k++) {
+            if (this[k] &gt; this[k + 1]) {
+                temp = this[k];
+                this[k] = this[k + 1];
+                this[k + 1] = temp;
+            }
+        }
+    }
+    return this;
+}
+</code></pre><p>⬆ back to top</p>
+<p>仿String.match()方法实现</p>
+<pre><code>String.prototype.mymatch = function (reg) {
+ var ary = [];
+ var res = reg.exec(this);
+ while (res) {
+    ary.push(res[0]);
+    res = reg.exec(this);
+ }
+ return ary;
+}
+</code></pre><p>⬆ back to top</p>
+<p>返回元素的第n层祖先元素</p>
+<pre><code>/**
+*返回元素ele的第n层祖先元素，如果不存在此类祖先或祖先不是Element，
+*（例如Document或者DocumentFragment）则返回null
+*如果n为0，则返回e本身。如果n为1（或省略），则返回其父元素
+*如果n为2，则返回其祖父元素，依次类推
+*/
+function parent(ele, n) {
+    if (n === nudefined) n = 1;
+    while (n-- &amp;&amp; ele) {
+        ele = ele.parentNode;
+    }
+    if (!ele || ele.nodeTope !== 1) return null;
+    return ele;
+}
+</code></pre><p>⬆ back to top</p>
+<p>返回元素的第n个兄弟元素</p>
+<p>/<em>*
+ </em>返回元素ele的第n个兄弟元素<br> <em>如果n为正，返回后续的第n个兄弟元素
+ </em>如果n为负，返回前面的第n个兄弟元素<br> <em>如果n为零，返回ele本身
+ </em>/<br>function sibling(ele, n) {<br>    while (ele &amp;&amp; n !== 0) { //如果ele未定义，即刻返回它<br>        if (n &gt; 0) { //查找后续的兄弟元素<br>            if (ele.nextElementSibling) {<br>                ele = ele.nextElementSibling;<br>            } else {<br>                for (ele = ele.nextSibling; ele &amp;&amp; ele.nodeType !== 1; ele = ele.nextSibling) /<em>空循环</em>/;<br>            }<br>            n–;<br>        } else { //查找前面的兄弟元素<br>            if (ele.previousElementSibing) {<br>                ele = ele.previousElementSibling;<br>            } else {<br>                for (ele = ele.previousSibling; ele &amp;&amp; ele.nodeType !== 1; ele = ele.previousSibling) /<em>空循环</em>/;<br>            }<br>            n++;<br>        }<br>    }<br>    return ele;<br>}<br>⬆ back to top</p>
+<p>返回元素的第n个子代元素</p>
+<p>/<em>*
+ </em>返回元素ele的第n代子元素，如果不存在则为null<br> <em>负值n代表从后往前计数。0表示第一个子元素，而-1代表最后一个，-2代表倒数第二个，依次类推
+ </em>/<br>function child(ele, n) {<br>    if (ele.children) { //如果children数组存在<br>        if (n &lt; 0) n += ele.children.length; //转换负的n为数组索引<br>        if (n &lt; 0) return null; //如果它仍然为负，说明没有子元素<br>        return ele.children[n]; //返回指定的子元素<br>    }<br>    //如果e没有children数组，找到第一个子元素并向前数，或找到最后一个子元素并往回数<br>    if (n &gt;= 0) { //n非负：从第一个子元素向前数<br>        //找到元素e的第一个子元素<br>        if (ele.firstElementChild) {<br>            ele = ele.firstElementChild;<br>        } else {<br>            for (ele = ele.firstChild; ele &amp;&amp; ele.nodeType !== 1; ele = ele.nextSibling) /<em>空循环</em>/;<br>        }<br>        return sibling(ele, n); //返回第一个子元素的第n个兄弟元素<br>    } else { //n为负：从最后一个子元素往回数<br>        if (ele.lastElementChild) {<br>            ele = ele.lastElementChild;<br>        } else {<br>            for (ele = ele.lastChild; ele &amp;&amp; ele.nodeType !== 1; ele = ele.previousSibling) /<em>空循环</em>/;<br>        }<br>        return sibling(ele, n + 1); //+1来转化最后1个子元素为最后1个兄弟元素<br>    }<br>}</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/11/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -419,7 +729,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
